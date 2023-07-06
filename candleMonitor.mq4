@@ -8,10 +8,13 @@
 #property version   "1.00"
 #property strict
 #property indicator_chart_window
+
+#include <CandleMonitorGraphic.mqh>
  
-input ENUM_TIMEFRAMES Timeframe = PERIOD_H4;
-input string TargetHotKey = "t";
-input bool ShowCandleStart = false;
+input ENUM_TIMEFRAMES Timeframe = PERIOD_H4; //Candle Timeframe
+input string TargetHotKey = "t"; //Target Hotkey
+input bool ShowCandleStart = false; //Show Candle Start
+
 bool adjustTarget = false;
 double price = 0;
 datetime dt = 0;
@@ -20,164 +23,7 @@ bool targetRemoved = true;
  
 //VOID INITIALISATION
 void init(){
-   string objName1 = "candleBody";
-   ObjectCreate(0,objName1,OBJ_RECTANGLE_LABEL,0,0,0);
-   ObjectSetInteger(0,objName1,OBJPROP_XDISTANCE,70); //Set object coordinates
-   ObjectSetInteger(0,objName1,OBJPROP_YDISTANCE,70); 
-   ObjectSetInteger(0,objName1,OBJPROP_XSIZE,60); //Set object size 
-   ObjectSetInteger(0,objName1,OBJPROP_YSIZE,70); 
-   ObjectSetInteger(0,objName1,OBJPROP_BGCOLOR,C'0,0,0'); 
-   ObjectSetInteger(0,objName1,OBJPROP_BORDER_TYPE,BORDER_FLAT); 
-   ObjectSetInteger(0,objName1,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
-   ObjectSetInteger(0,objName1,OBJPROP_COLOR,C'153,50,204');
-   ObjectSetInteger(0,objName1,OBJPROP_STYLE,STYLE_SOLID); 
-   ObjectSetInteger(0,objName1,OBJPROP_WIDTH,2); 
-   ObjectSetInteger(0,objName1,OBJPROP_BACK,false); 
-   ObjectSetInteger(0,objName1,OBJPROP_SELECTABLE,false); 
-   ObjectSetInteger(0,objName1,OBJPROP_SELECTED,false); 
-   ObjectSetInteger(0,objName1,OBJPROP_HIDDEN,true); 
-   ObjectSetInteger(0,objName1,OBJPROP_ZORDER,0);
-   
-   string objName2 = "topWick";
-   ObjectCreate(0,objName2,OBJ_RECTANGLE_LABEL,0,0,0);
-   ObjectSetInteger(0,objName2,OBJPROP_XDISTANCE,43); //Set object coordinates
-   ObjectSetInteger(0,objName2,OBJPROP_YDISTANCE,40); 
-   ObjectSetInteger(0,objName2,OBJPROP_XSIZE,4); //Set object size 
-   ObjectSetInteger(0,objName2,OBJPROP_YSIZE,30);
-   ObjectSetInteger(0,objName2,OBJPROP_BGCOLOR,C'0,0,0'); 
-   ObjectSetInteger(0,objName2,OBJPROP_BORDER_TYPE,BORDER_FLAT); 
-   ObjectSetInteger(0,objName2,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
-   ObjectSetInteger(0,objName2,OBJPROP_COLOR,C'153,50,204');
-   ObjectSetInteger(0,objName2,OBJPROP_STYLE,STYLE_SOLID); 
-   ObjectSetInteger(0,objName2,OBJPROP_WIDTH,2); 
-   ObjectSetInteger(0,objName2,OBJPROP_BACK,false); 
-   ObjectSetInteger(0,objName2,OBJPROP_SELECTABLE,false); 
-   ObjectSetInteger(0,objName2,OBJPROP_SELECTED,false); 
-   ObjectSetInteger(0,objName2,OBJPROP_HIDDEN,true); 
-   ObjectSetInteger(0,objName2,OBJPROP_ZORDER,0);
-   
-   string objName3 = "bottomWick";
-   ObjectCreate(0,objName3,OBJ_RECTANGLE_LABEL,0,0,0);
-   ObjectSetInteger(0,objName3,OBJPROP_XDISTANCE,43); //Set object coordinates
-   ObjectSetInteger(0,objName3,OBJPROP_YDISTANCE,139); 
-   ObjectSetInteger(0,objName3,OBJPROP_XSIZE,4); //Set object size 
-   ObjectSetInteger(0,objName3,OBJPROP_YSIZE,30);
-   ObjectSetInteger(0,objName3,OBJPROP_BGCOLOR,C'0,0,0'); 
-   ObjectSetInteger(0,objName3,OBJPROP_BORDER_TYPE,BORDER_FLAT); 
-   ObjectSetInteger(0,objName3,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
-   ObjectSetInteger(0,objName3,OBJPROP_COLOR,C'153,50,204');
-   ObjectSetInteger(0,objName3,OBJPROP_STYLE,STYLE_SOLID); 
-   ObjectSetInteger(0,objName3,OBJPROP_WIDTH,2); 
-   ObjectSetInteger(0,objName3,OBJPROP_BACK,false); 
-   ObjectSetInteger(0,objName3,OBJPROP_SELECTABLE,false); 
-   ObjectSetInteger(0,objName3,OBJPROP_SELECTED,false); 
-   ObjectSetInteger(0,objName3,OBJPROP_HIDDEN,true); 
-   ObjectSetInteger(0,objName3,OBJPROP_ZORDER,0);
-   
-   string objName4 = "candleTimeframe";     
-   ObjectCreate(0,objName4,OBJ_EDIT,0,0,0);
-   ObjectSetInteger(0,objName4,OBJPROP_XDISTANCE,64); //Set object coordinates
-   ObjectSetInteger(0,objName4,OBJPROP_YDISTANCE,72);
-   ObjectSetInteger(0,objName4,OBJPROP_XSIZE,50); //Set object size 
-   ObjectSetInteger(0,objName4,OBJPROP_YSIZE,20); 
-   ObjectSetString(0,objName4,OBJPROP_TEXT,GetTimeFrame()); //Set the text 
-   ObjectSetString(0,objName4,OBJPROP_FONT,"Arial"); 
-   ObjectSetInteger(0,objName4,OBJPROP_FONTSIZE,9); 
-   ObjectSetInteger(0,objName4,OBJPROP_ALIGN,ALIGN_CENTER); 
-   ObjectSetInteger(0,objName4,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
-   ObjectSetInteger(0,objName4,OBJPROP_READONLY,true); 
-   ObjectSetInteger(0,objName4,OBJPROP_COLOR,clrWhite); 
-   ObjectSetInteger(0,objName4,OBJPROP_BGCOLOR,C'0,0,0'); 
-   ObjectSetInteger(0,objName4,OBJPROP_BORDER_COLOR,C'0,0,0'); 
-   ObjectSetInteger(0,objName4,OBJPROP_BACK,false); 
-   ObjectSetInteger(0,objName4,OBJPROP_SELECTABLE,false); 
-   ObjectSetInteger(0,objName4,OBJPROP_SELECTED,false); 
-   ObjectSetInteger(0,objName4,OBJPROP_HIDDEN,true); 
-   ObjectSetInteger(0,objName4,OBJPROP_ZORDER,0);
-   
-   string objName5 = "candleHigh";     
-   ObjectCreate(0,objName5,OBJ_EDIT,0,0,0);
-   ObjectSetInteger(0,objName5,OBJPROP_XDISTANCE,70); //Set object coordinates 
-   ObjectSetInteger(0,objName5,OBJPROP_YDISTANCE,20);
-   ObjectSetInteger(0,objName5,OBJPROP_XSIZE,60); //Set object size 
-   ObjectSetInteger(0,objName5,OBJPROP_YSIZE,25); 
-   ObjectSetString(0,objName5,OBJPROP_TEXT,"0"); //Set the text  
-   ObjectSetString(0,objName5,OBJPROP_FONT,"Arial"); 
-   ObjectSetInteger(0,objName5,OBJPROP_FONTSIZE,9); 
-   ObjectSetInteger(0,objName5,OBJPROP_ALIGN,ALIGN_CENTER); 
-   ObjectSetInteger(0,objName5,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
-   ObjectSetInteger(0,objName5,OBJPROP_READONLY,true); 
-   ObjectSetInteger(0,objName5,OBJPROP_COLOR,clrWhite); 
-   ObjectSetInteger(0,objName5,OBJPROP_BGCOLOR,C'0,0,0'); 
-   ObjectSetInteger(0,objName5,OBJPROP_BORDER_COLOR,C'0,0,0'); 
-   ObjectSetInteger(0,objName5,OBJPROP_BACK,false); 
-   ObjectSetInteger(0,objName5,OBJPROP_SELECTABLE,false); 
-   ObjectSetInteger(0,objName5,OBJPROP_SELECTED,false); 
-   ObjectSetInteger(0,objName5,OBJPROP_HIDDEN,true); 
-   ObjectSetInteger(0,objName5,OBJPROP_ZORDER,0);
-   
-   string objName6 = "candleSize";     
-   ObjectCreate(0,objName6,OBJ_EDIT,0,0,0);
-   ObjectSetInteger(0,objName6,OBJPROP_XDISTANCE,64); //Set object coordinates
-   ObjectSetInteger(0,objName6,OBJPROP_YDISTANCE,92);
-   ObjectSetInteger(0,objName6,OBJPROP_XSIZE,50); //Set object size  
-   ObjectSetInteger(0,objName6,OBJPROP_YSIZE,25); 
-   ObjectSetString(0,objName6,OBJPROP_TEXT,"0"); //Set the text 
-   ObjectSetString(0,objName6,OBJPROP_FONT,"Arial"); 
-   ObjectSetInteger(0,objName6,OBJPROP_FONTSIZE,9); 
-   ObjectSetInteger(0,objName6,OBJPROP_ALIGN,ALIGN_CENTER); 
-   ObjectSetInteger(0,objName6,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
-   ObjectSetInteger(0,objName6,OBJPROP_READONLY,true); 
-   ObjectSetInteger(0,objName6,OBJPROP_COLOR,clrWhite); 
-   ObjectSetInteger(0,objName6,OBJPROP_BGCOLOR,C'0,0,0'); 
-   ObjectSetInteger(0,objName6,OBJPROP_BORDER_COLOR,C'0,0,0'); 
-   ObjectSetInteger(0,objName6,OBJPROP_BACK,false); 
-   ObjectSetInteger(0,objName6,OBJPROP_SELECTABLE,false); 
-   ObjectSetInteger(0,objName6,OBJPROP_SELECTED,false); 
-   ObjectSetInteger(0,objName6,OBJPROP_HIDDEN,true); 
-   ObjectSetInteger(0,objName6,OBJPROP_ZORDER,0);
-   
-   string objName7 = "candleLow";     
-   ObjectCreate(0,objName7,OBJ_EDIT,0,0,0);
-   ObjectSetInteger(0,objName7,OBJPROP_XDISTANCE,70); //Set object coordinates 
-   ObjectSetInteger(0,objName7,OBJPROP_YDISTANCE,165);
-   ObjectSetInteger(0,objName7,OBJPROP_XSIZE,60); //Set object size  
-   ObjectSetInteger(0,objName7,OBJPROP_YSIZE,25); 
-   ObjectSetString(0,objName7,OBJPROP_TEXT,"0"); //Set the text 
-   ObjectSetString(0,objName7,OBJPROP_FONT,"Arial"); 
-   ObjectSetInteger(0,objName7,OBJPROP_FONTSIZE,9); 
-   ObjectSetInteger(0,objName7,OBJPROP_ALIGN,ALIGN_CENTER);
-   ObjectSetInteger(0,objName7,OBJPROP_CORNER,CORNER_RIGHT_UPPER); 
-   ObjectSetInteger(0,objName7,OBJPROP_READONLY,true); 
-   ObjectSetInteger(0,objName7,OBJPROP_COLOR,clrWhite); 
-   ObjectSetInteger(0,objName7,OBJPROP_BGCOLOR,C'0,0,0'); 
-   ObjectSetInteger(0,objName7,OBJPROP_BORDER_COLOR,C'0,0,0'); 
-   ObjectSetInteger(0,objName7,OBJPROP_BACK,false); 
-   ObjectSetInteger(0,objName7,OBJPROP_SELECTABLE,false); 
-   ObjectSetInteger(0,objName7,OBJPROP_SELECTED,false); 
-   ObjectSetInteger(0,objName7,OBJPROP_HIDDEN,true); 
-   ObjectSetInteger(0,objName7,OBJPROP_ZORDER,0);
-   
-   string objName8 = "CandleCountdown";     
-   ObjectCreate(0,objName8,OBJ_EDIT,0,0,0);
-   ObjectSetInteger(0,objName8,OBJPROP_XDISTANCE,64); //Set object coordinates 
-   ObjectSetInteger(0,objName8,OBJPROP_YDISTANCE,113);
-   ObjectSetInteger(0,objName8,OBJPROP_XSIZE,50); //Set object size  
-   ObjectSetInteger(0,objName8,OBJPROP_YSIZE,25); 
-   ObjectSetString(0,objName8,OBJPROP_TEXT,"00:00:00"); //Set the text 
-   ObjectSetString(0,objName8,OBJPROP_FONT,"Arial"); 
-   ObjectSetInteger(0,objName8,OBJPROP_FONTSIZE,9); 
-   ObjectSetInteger(0,objName8,OBJPROP_ALIGN,ALIGN_CENTER);
-   ObjectSetInteger(0,objName8,OBJPROP_CORNER,CORNER_RIGHT_UPPER); 
-   ObjectSetInteger(0,objName8,OBJPROP_READONLY,true); 
-   ObjectSetInteger(0,objName8,OBJPROP_COLOR,clrWhite); 
-   ObjectSetInteger(0,objName8,OBJPROP_BGCOLOR,C'0,0,0'); 
-   ObjectSetInteger(0,objName8,OBJPROP_BORDER_COLOR,C'0,0,0'); 
-   ObjectSetInteger(0,objName8,OBJPROP_BACK,false); 
-   ObjectSetInteger(0,objName8,OBJPROP_SELECTABLE,false); 
-   ObjectSetInteger(0,objName8,OBJPROP_SELECTED,false); 
-   ObjectSetInteger(0,objName8,OBJPROP_HIDDEN,true); 
-   ObjectSetInteger(0,objName8,OBJPROP_ZORDER,0);
+   showCandle();
    
    EventSetTimer(1);
 }
@@ -192,10 +38,12 @@ void start(){
    double candleSize = NormalizeDouble((candleOpen - Bid) / _Point,Digits); //Convert candle size to points
    
    if(candleOpen > Bid){ //Change indicator colour to red
+      candleLowPoints = NormalizeDouble((Bid - candleLow) / _Point,Digits);
       ObjectSetInteger(0,"candleBody",OBJPROP_COLOR,C'255,0,0');
       ObjectSetInteger(0,"topWick",OBJPROP_COLOR,C'255,0,0');
       ObjectSetInteger(0,"bottomWick",OBJPROP_COLOR,C'255,0,0');
    }else{ //Change indicator colour to green
+      candleHighPoints = NormalizeDouble((candleHigh - Bid) / _Point,Digits);
       ObjectSetInteger(0,"candleBody",OBJPROP_COLOR,C'0,255,0');
       ObjectSetInteger(0,"topWick",OBJPROP_COLOR,C'0,255,0');
       ObjectSetInteger(0,"bottomWick",OBJPROP_COLOR,C'0,255,0');
@@ -211,11 +59,11 @@ void start(){
       
       string objName9 = "candleTarget";     
       ObjectCreate(0,objName9,OBJ_EDIT,0,0,0);
-      ObjectSetInteger(0,objName9,OBJPROP_XDISTANCE,70); //Set object coordinates 
+      ObjectSetInteger(0,objName9,OBJPROP_XDISTANCE,70); //Set object coordinates
       ObjectSetInteger(0,objName9,OBJPROP_YDISTANCE,195);
-      ObjectSetInteger(0,objName9,OBJPROP_XSIZE,60); //Set object size  
+      ObjectSetInteger(0,objName9,OBJPROP_XSIZE,60); //Set object size 
       ObjectSetInteger(0,objName9,OBJPROP_YSIZE,25); 
-      ObjectSetString(0,objName9,OBJPROP_TEXT,StringConcatenate(fabs(NormalizeDouble((target - Bid) / _Point,Digits)))); //Set the text 
+      ObjectSetString(0,objName9,OBJPROP_TEXT,StringConcatenate(fabs(NormalizeDouble((target - Bid) / _Point,Digits)))); //Set the text
       ObjectSetString(0,objName9,OBJPROP_FONT,"Arial"); 
       ObjectSetInteger(0,objName9,OBJPROP_FONTSIZE,9); 
       ObjectSetInteger(0,objName9,OBJPROP_ALIGN,ALIGN_CENTER);
@@ -237,7 +85,7 @@ void start(){
    }
 }
 //-----------------------------------------------------------------------------
-void deinit(){ //Delete indicator from chart
+void deinit(){ //Delete indicator graphic interface from chart
    ObjectDelete(0, "candleBody");
    ObjectDelete(0, "topWick");
    ObjectDelete(0, "bottomWick");
@@ -245,7 +93,7 @@ void deinit(){ //Delete indicator from chart
    ObjectDelete(0, "candleHigh");
    ObjectDelete(0, "candleSize");
    ObjectDelete(0, "candleLow");
-   ObjectDelete(0, "CandleCountdown");
+   ObjectDelete(0, "indicatorCandleCountdown");
    ObjectDelete(0, "candleTarget");
    ObjectDelete(0, "CurrentCandleStart");
    
@@ -271,7 +119,7 @@ void OnTimer(){ //Calculate time until candle closes
    datetime currentTime = TimeCurrent(); //Current time
    datetime currentCandleClose = currentCandleOpen + (Timeframe * 60); //Calculate current candle close time
    datetime countdown = currentCandleClose - currentTime; //Countdown
-   ObjectSetString(0,"CandleCountdown",OBJPROP_TEXT,StringConcatenate(TimeToStr(countdown,TIME_SECONDS))); //Set the text 
+   ObjectSetString(0,"indicatorCandleCountdown",OBJPROP_TEXT,StringConcatenate(TimeToStr(countdown,TIME_SECONDS))); //Set the text 
    
    if(ShowCandleStart){ //Place line on the chart indicating what time the current candle started
       ObjectDelete(0,"CurrentCandleStart");
